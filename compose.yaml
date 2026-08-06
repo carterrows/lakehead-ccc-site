@@ -1,0 +1,6 @@
+services:
+  website:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3030:3030"

@@ -1,0 +1,180 @@
+---
+import { getCollection, getEntry, render } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const page = await getEntry("pages", "home");
+if (!page) throw new Error("Home page content was not found.");
+
+const competitionEntries = (await getCollection("competitions")).sort((a, b) => b.data.year - a.data.year);
+const competitions = await Promise.all(
+  competitionEntries.map(async (entry) => ({
+    entry,
+    Content: (await render(entry)).Content,
+  })),
+);
+const sponsors = (await getCollection("sponsors")).sort((a, b) => a.data.order - b.data.order);
+const emailHref = `mailto:${page.data.email}`;
+const navigation = ["About", "Team", "Competition", "Sponsorship", "Contact", "Donate"];
+---
+
+<BaseLayout
+  title="Lakehead Concrete Canoe Team"
+  description="Meet the Lakehead University Concrete Canoe Team: student engineers designing, building, and racing concrete canoes across Canada."
+>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="Lakehead Concrete Canoe Team home">
+      <img src="/images/team-logo.png" alt="" width="70" height="70" />
+      <span>
+        <strong>Lakehead CCC</strong>
+        <small>Concrete Canoe Team</small>
+      </span>
+    </a>
+    <nav aria-label="Main navigation">
+      <ul>
+        {navigation.map((item) => (
+          <li><a class={item === "Donate" ? "nav-donate" : undefined} href={`#${item.toLowerCase()}`}>{item}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </header>
+
+  <main id="home">
+    <section class="hero" aria-labelledby="hero-title">
+      <img class="hero-photo" src="/images/lake-race.jpeg" alt="Two Lakehead concrete canoes racing on a lake" />
+      <div class="hero-shade"></div>
+      <div class="hero-content wrap">
+        <img class="hero-logo" src="/images/team-logo.png" alt="Lakehead University Concrete Canoe Team" width="270" height="270" />
+        <div>
+          <p class="eyebrow light">{page.data.eyebrow}</p>
+          <h1 id="hero-title">{page.data.title}</h1>
+          <p class="hero-tagline">{page.data.tagline}</p>
+          <p class="hero-intro">{page.data.introduction}</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#about">Meet the team</a>
+            <a class="button button-outline" href="#sponsorship">Support the build</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap about-grid" id="about" aria-labelledby="about-title">
+      <div>
+        <p class="eyebrow">Who we are</p>
+        <h2 id="about-title">Built by students. Tested up north.</h2>
+      </div>
+      <p class="lead">{page.data.about}</p>
+    </section>
+
+    <section class="section section-blue" id="team" aria-labelledby="team-title">
+      <div class="wrap feature-grid">
+        <div class="feature-number" aria-hidden="true">01</div>
+        <div>
+          <p class="eyebrow light">Join the crew</p>
+          <h2 id="team-title">All majors. One canoe.</h2>
+          <p>{page.data.joining}</p>
+          <a class="text-link light-link" href={emailHref}>Ask about joining <span aria-hidden="true">→</span></a>
+        </div>
+        <aside class="team-note">
+          <strong>Team profiles are coming soon.</strong>
+          <span>We’ll add roles and headshots as the 2026 crew takes shape.</span>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section wrap float-grid" aria-labelledby="float-title">
+      <div class="float-card">
+        <span class="question-mark" aria-hidden="true">?</span>
+        <p>Short answer</p>
+        <strong>Yes, it floats.</strong>
+      </div>
+      <div>
+        <p class="eyebrow">The question we always get</p>
+        <h2 id="float-title">Does it float?</h2>
+        <p class="lead">{page.data.floating}</p>
+        <p class="aside-copy">Part materials science, part structural engineering, and—at first glance—a little bit of witchcraft.</p>
+      </div>
+    </section>
+
+    <section class="section section-stone" id="competition" aria-labelledby="competition-title">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">The competition</p>
+            <h2 id="competition-title">Concrete. Canoes. Across Canada.</h2>
+          </div>
+          <p>{page.data.competition}</p>
+        </div>
+
+        <div class="archive-heading">
+          <h3>Team archive</h3>
+          <span>Where we’ve been</span>
+        </div>
+        <div class="archive-grid">
+          {competitions.map(({ entry, Content }) => {
+            return (
+              <article class:list={["archive-card", { featured: entry.data.featured }]}>
+                <div class="archive-image-wrap">
+                  <img src={entry.data.image} alt={entry.data.imageAlt} loading="lazy" />
+                  <span class="year">{entry.data.year}</span>
+                </div>
+                <div class="archive-copy">
+                  <h4>{entry.data.title}</h4>
+                  <Content />
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap" id="sponsorship" aria-labelledby="sponsors-title">
+      <div class="section-heading sponsor-heading">
+        <div>
+          <p class="eyebrow">Our supporters</p>
+          <h2 id="sponsors-title">They help keep us afloat.</h2>
+        </div>
+        <p>Our sponsors provide the materials, expertise, and support that make every build possible. Thank you for backing student engineering at Lakehead.</p>
+      </div>
+      <div class="sponsor-grid">
+        {sponsors.map((sponsor) => (
+          <article class="sponsor-card">
+            <img src={sponsor.data.logo} alt={sponsor.data.logoAlt} loading="lazy" />
+            <span>{sponsor.data.name}</span>
+          </article>
+        ))}
+        <a class="sponsor-card sponsor-cta" href={emailHref}>
+          <span class="plus" aria-hidden="true">+</span>
+          <span>Become a sponsor</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contact" aria-labelledby="contact-title">
+      <div class="wrap contact-grid">
+        <div>
+          <p class="eyebrow light">Contact</p>
+          <h2 id="contact-title">Come aboard.</h2>
+          <p>Questions about the team, sponsorship, or getting involved? Send us an email and we’ll get back to you.</p>
+          <a class="email-link" href={emailHref}>{page.data.email}</a>
+        </div>
+        <div class="donate-card" id="donate">
+          <p class="eyebrow">Support the team</p>
+          <h3>Help fund our next launch.</h3>
+          <p>Donations help cover materials, testing, travel, and competition costs.</p>
+          <a class="button button-primary" href={`${emailHref}?subject=Lakehead%20Concrete%20Canoe%20Donation`}>Ask about donating</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <a class="footer-brand" href="#home">
+        <img src="/images/team-logo.png" alt="" width="46" height="46" />
+        <span>Lakehead Concrete Canoe Team</span>
+      </a>
+      <span>© 2026 Lakehead CCC</span>
+    </div>
+  </footer>
+</BaseLayout>
