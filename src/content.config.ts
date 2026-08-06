@@ -13,7 +13,7 @@ const pages = defineCollection({
     joining: z.string(),
     floating: z.string(),
     competition: z.string(),
-    email: z.string().email(),
+    email: z.email(),
   }),
 });
 
