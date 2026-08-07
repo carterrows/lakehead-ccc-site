@@ -1,6 +1,6 @@
 ---
-name: "Lakehead University North"
-logo: "/images/lakehead-north.webp"
-logoAlt: "Lakehead University North logo"
+name: "LH North"
+logo: "/images/lh-north.webp"
+logoAlt: "LH North logo"
 order: 1
 ---
